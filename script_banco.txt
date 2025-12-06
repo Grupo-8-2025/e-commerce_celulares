@@ -1,10 +1,7 @@
 -- Criar o banco de dados
-CREATE DATABASE ecommerce;
+CREATE DATABASE IF NOT EXISTS ecommerce;
 USE ecommerce;
 
------------------------------------------------------
--- TABELA: usuario
------------------------------------------------------
 CREATE TABLE usuario (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
@@ -13,26 +10,17 @@ CREATE TABLE usuario (
     tipo INT NOT NULL
 );
 
------------------------------------------------------
--- TABELA: categoria
------------------------------------------------------
 CREATE TABLE categoria (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL
 );
 
------------------------------------------------------
--- TABELA: fabricante
------------------------------------------------------
 CREATE TABLE fabricante (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
     site VARCHAR(150)
 );
 
------------------------------------------------------
--- TABELA: produto
------------------------------------------------------
 CREATE TABLE produto (
     id INT PRIMARY KEY AUTO_INCREMENT,
     categoria_id INT NOT NULL,
@@ -53,9 +41,6 @@ CREATE TABLE produto (
         REFERENCES fabricante(id)
 );
 
------------------------------------------------------
--- TABELA: caracteristica
------------------------------------------------------
 CREATE TABLE caracteristica (
     id INT PRIMARY KEY AUTO_INCREMENT,
     produto_id INT NOT NULL,
@@ -68,13 +53,10 @@ CREATE TABLE caracteristica (
         ON DELETE CASCADE
 );
 
------------------------------------------------------
--- TABELA: venda
------------------------------------------------------
 CREATE TABLE venda (
     id INT PRIMARY KEY AUTO_INCREMENT,
     usuario_id INT NOT NULL,
-    data_venda DATE NOT NULL,
+    data_venda DATE NOT NULL DEFAULT (CURRENT_DATE),
     valor_venda FLOAT NOT NULL,
 
     CONSTRAINT venda_FK_usuario
@@ -82,9 +64,7 @@ CREATE TABLE venda (
         REFERENCES usuario(id)
 );
 
------------------------------------------------------
--- TABELA: item_venda
------------------------------------------------------
+
 CREATE TABLE item_venda (
     id INT PRIMARY KEY AUTO_INCREMENT,
     venda_id INT NOT NULL,

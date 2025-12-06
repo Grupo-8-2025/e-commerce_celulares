@@ -7,11 +7,12 @@ class Usuario{
     private $senha;
     private $tipo;
 
-    public function __construct($id, $nome, $login, $senha){
-        $this->id = $id;
+    public function __construct($nome, $login, $senha, $tipo){
+        //$this->id = $id;
         $this->nome = $nome;
         $this->login = $login;
         $this->senha = $senha;
+        $this->tipo = $tipo;
     }
 
     public function setId($id){
@@ -37,5 +38,12 @@ class Usuario{
     }
     public function getSenha(){
         return $this->senha;
+    }
+
+    public function setTipo($tipo){
+        $this->tipo = $tipo;
+    }
+    public function getTipo(){
+        return $this->tipo;
     }
 }

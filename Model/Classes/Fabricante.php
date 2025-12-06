@@ -23,10 +23,13 @@ class Fabricante{
     public function getNome(){
         return $this->nome;
     }
-    public function setPaisOrigem($site){
+    public function setSite($site){
         $this->site = $site;
     }
-    public function getPaisOrigem(){
+    public function getSite(){
         return $this->site;
     }
+    
 }
+
+?>

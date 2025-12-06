@@ -2,7 +2,7 @@
 
 class Conexao{
     private $host = 'localhost';
-    private $dbname = 'bd_sistema_tcc';
+    private $dbname = 'ecommerce';
     private $username = 'root';
     private $password = '';
     private $erro;
