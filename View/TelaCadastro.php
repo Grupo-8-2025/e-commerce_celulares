@@ -79,6 +79,8 @@
                             </form>
                             <div class="mt-3 text-center">
                                 <a href="TelaLogin.php" class="text-decoration-none" style="color: #11314d;">Já tem uma conta? Faça login</a>
+                                <br>
+                                <a href="Sobre.php" class="text-decoration-none text-muted">Sobre a DMS Celulares</a>
                             </div>
                         </div>
                     </div>
@@ -103,7 +105,7 @@
                     mismatch.classList.add('d-none');
                 }
             });
-            
+
             toggleButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const targetId = btn.getAttribute('data-target');

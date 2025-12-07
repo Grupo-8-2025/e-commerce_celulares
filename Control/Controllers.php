@@ -5,12 +5,34 @@ if (isset($_GET['acao']) && $_GET['acao'] === 'usuario_cadastro') {
     require_once __DIR__ . '/../Control/UsuarioController.php';
     require_once __DIR__ . '/../Model/Classes/Usuario.php';
 
-    $nome = $_POST['nome'] ?? '';
-    $login = $_POST['login'] ?? '';
+    $nome = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_SPECIAL_CHARS) ?? '');
+    $login = trim(filter_input(INPUT_POST, 'login', FILTER_SANITIZE_EMAIL) ?? '');
     $senha = $_POST['senha'] ?? '';
-    $tipo = isset($_POST['tipo']) ? (int) $_POST['tipo'] : 1;
+    $tipo = filter_input(INPUT_POST, 'tipo', FILTER_VALIDATE_INT) ?? 1;
 
     $controller = new UsuarioController();
+    
+    if (empty($nome) || empty($login) || empty($senha)) {
+        $erros[] = "Todos os campos são obrigatórios.";
+        $_SESSION['erros_cadastro'] = $erros;
+        header("Location: ../View/TelaCadastro.php");
+        exit;
+    }
+
+    if (!filter_var($login, FILTER_VALIDATE_EMAIL)) {
+        $erros[] = "Email inválido.";
+        $_SESSION['erros_cadastro'] = $erros;
+        header("Location: ../View/TelaCadastro.php");
+        exit;
+    }
+
+    if (strlen($senha) < 6) {
+        $erros[] = "A senha deve ter pelo menos 6 caracteres.";
+        $_SESSION['erros_cadastro'] = $erros;
+        header("Location: ../View/TelaCadastro.php");
+        exit;
+    }
+
     if ($controller->cadastrarUsuario(new Usuario($nome, $login, $senha, $tipo))) {
         $_SESSION['usuario_logado'] = true;
         $_SESSION['usuario_tipo'] = $tipo;
@@ -36,10 +58,19 @@ if (isset($_GET['acao']) && $_GET['acao'] === 'usuario_login') {
     require_once __DIR__ . '/../Control/UsuarioController.php';
     require_once __DIR__ . '/../Model/Classes/Usuario.php';
 
-    $login = $_POST['login'] ?? '';
+    $login = trim(filter_input(INPUT_POST, 'login', FILTER_SANITIZE_EMAIL) ?? '');
     $senha = $_POST['senha'] ?? '';
 
     $controller = new UsuarioController();
+    
+    if (empty($login) || empty($senha)) {
+        $erros[] = "Login e senha são obrigatórios.";
+        $_SESSION['erros_login'] = $erros;
+        $_SESSION['email_login'] = $login;
+        header("Location: ../View/TelaLogin.php");
+        exit;
+    }
+
     $usuario = $controller->autenticar($login, $senha);
 
     if ($usuario) {

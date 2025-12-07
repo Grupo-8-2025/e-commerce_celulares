@@ -35,6 +35,7 @@ class VendaDAO {
             $this->pdo->beginTransaction();
             if (!$this->criar($venda)) {
                 $this->pdo->rollBack();
+                error_log("Erro ao criar venda: " . print_r($this->pdo->errorInfo(), true));
                 return false;
             }
             $itemDAO = new ItemVendaDAO();
@@ -42,6 +43,7 @@ class VendaDAO {
                 $item->setVendaID($venda->getId());
                 if (!$itemDAO->criar($item)) {
                     $this->pdo->rollBack();
+                    error_log("Erro ao criar item_venda: " . print_r($this->pdo->errorInfo(), true));
                     return false;
                 }
             }
@@ -49,6 +51,7 @@ class VendaDAO {
             return true;
         } catch (Exception $e) {
             $this->pdo->rollBack();
+            error_log("Exceção em criarComItens: " . $e->getMessage());
             return false;
         }
     }

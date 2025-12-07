@@ -49,8 +49,22 @@ if ($pagina === 'admin') {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $acao = $_POST['action'] ?? '';
         try {
+            // Sanitize inputs
+            $dadosSanitizados = [
+                'id' => filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT) ?: null,
+                'nome' => trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_SPECIAL_CHARS) ?? ''),
+                'descricao' => trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_SPECIAL_CHARS) ?? ''),
+                'imagem' => trim(filter_input(INPUT_POST, 'imagem', FILTER_SANITIZE_URL) ?? ''),
+                'estoque' => filter_input(INPUT_POST, 'estoque', FILTER_VALIDATE_INT) ?: 0,
+                'preco_custo' => filter_input(INPUT_POST, 'preco_custo', FILTER_VALIDATE_FLOAT) ?: 0,
+                'preco_venda' => filter_input(INPUT_POST, 'preco_venda', FILTER_VALIDATE_FLOAT) ?: 0,
+                'categoria_id' => filter_input(INPUT_POST, 'categoria_id', FILTER_VALIDATE_INT) ?: 0,
+                'fabricante_id' => filter_input(INPUT_POST, 'fabricante_id', FILTER_VALIDATE_INT) ?: 0,
+                'caracteristicas' => trim($_POST['caracteristicas'] ?? '')
+            ];
+
             if ($acao === 'create' || $acao === 'update') {
-                if ($produtoController->salvarProduto($_POST)) {
+                if ($produtoController->salvarProduto($dadosSanitizados)) {
                     $mensagemSucesso = $acao === 'create'
                         ? 'Produto criado com sucesso.'
                         : 'Produto atualizado com sucesso.';

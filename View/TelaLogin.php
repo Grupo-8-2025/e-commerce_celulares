@@ -71,6 +71,8 @@
                             </form>
                             <div class="mt-3 text-center">
                                 <a href="TelaCadastro.php" class="text-decoration-none" style="color: #11314d;">Não tem uma conta? Cadastre-se</a>
+                                <br>
+                                <a href="Sobre.php" class="text-decoration-none text-muted">Sobre a DMS Celulares</a>
                             </div>
                         </div>
                     </div>

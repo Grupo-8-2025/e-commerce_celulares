@@ -1,8 +1,8 @@
 <?php
-if (!isset($itens_carrinho, $valor_total, $produtos)) {
-    header('Location: ../../Control/CarrinhoController.php?acao=ver');
-    exit;
-}
+// Define valores padrão caso não venham do controller
+$itens_carrinho = $itens_carrinho ?? [];
+$valor_total = $valor_total ?? 0;
+$produtos = $produtos ?? [];
 ?>
 
 <!DOCTYPE html>
@@ -20,8 +20,9 @@ if (!isset($itens_carrinho, $valor_total, $produtos)) {
 
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a href="TelaProdutos.php" class="nav-link">Tela de Produtos</a></li>
-            <li class="nav-item"><a href="MinhasCompras.php" class="nav-link">Minhas Compras</a></li>
+            <li class="nav-item"><a href="../Control/ProdutoViewController.php?pagina=cliente" class="nav-link">Tela de Produtos</a></li>
+            <li class="nav-item"><a href="../Control/VendaController.php?acao=minhas_compras" class="nav-link">Minhas Compras</a></li>
+            <li class="nav-item"><a href="../Control/Logout.php" class="nav-link text-danger">Sair</a></li>
         </ul>
     </div>
 </nav>
@@ -29,55 +30,94 @@ if (!isset($itens_carrinho, $valor_total, $produtos)) {
 <div class="container text-center mt-5">
     <h2 class="fw-bold mb-4 text-primary">🛒 Carrinho de Compras</h2>
 
+    <?php if (isset($_GET['erro_msg']) && $_GET['erro_msg']): ?>
+        <div class="alert alert-danger text-center">
+            <?= htmlspecialchars($_GET['erro_msg'], ENT_QUOTES, 'UTF-8') ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['erro']) && $_GET['erro'] == 1): ?>
+        <div class="alert alert-danger text-center">
+            Erro ao confirmar compra. Tente novamente.
+        </div>
+    <?php endif; ?>
+
     <?php if (empty($itens_carrinho)): ?>
         <div class="alert alert-info text-center">
             Seu carrinho está vazio.
         </div>
     <?php else: ?>
 
-        <table class="table table-bordered align-middle text-center">
-            <thead class="table-light">
-                <tr>
-                    <th>Produto</th>
-                    <th>Preço</th>
-                    <th>Quantidade</th>
-                    <th>Subtotal</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
+        <form action="../Control/CarrinhoController.php" method="POST">
+            <input type="hidden" name="acao" value="atualizar">
+            
+            <table class="table table-bordered align-middle text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>Produto</th>
+                        <th>Preço</th>
+                        <th>Quantidade</th>
+                        <th>Subtotal</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
 
-            <tbody>
-                <?php foreach ($itens_carrinho as $produto_id => $quantidade): ?>
-                    <?php foreach ($produtos as $produto): ?>
-                        <?php if ($produto_id == $produto->getId()): ?>
-                            <tr>
-                                <td>
-                                    <img src="<?= $produto->getImagem() ?>" width="70" class="me-2">
-                                    <?= $produto->getNome() ?>
-                                </td>
+                <tbody>
+                    <?php foreach ($itens_carrinho as $produto_id => $quantidade): ?>
+                        <?php foreach ($produtos as $produto): ?>
+                            <?php if ($produto_id == $produto->getId()): ?>
+                                <tr>
+                                    <td>
+                                        <img src="<?= $produto->getImagem() ?>" width="70" class="me-2">
+                                        <?= $produto->getNome() ?>
+                                    </td>
 
-                                <td>R$ <?= number_format($produto->getPrecoVenda(), 2, ',', '.') ?></td>
+                                    <td>R$ <?= number_format($produto->getPrecoVenda(), 2, ',', '.') ?></td>
 
-                                <td><?= $quantidade ?></td>
+                                    <td>
+                                        <div class="d-flex justify-content-center align-items-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="alterarQuantidade(<?= $produto->getId() ?>, -1)">
+                                                <strong>−</strong>
+                                            </button>
+                                            <input type="number" 
+                                                   id="qtd_<?= $produto->getId() ?>"
+                                                   name="quantidades[<?= $produto->getId() ?>]" 
+                                                   value="<?= $quantidade ?>" 
+                                                   min="1" 
+                                                   class="form-control text-center" 
+                                                   style="width: 70px;"
+                                                   onchange="atualizarSubtotal(<?= $produto->getId() ?>, <?= $produto->getPrecoVenda() ?>)">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="alterarQuantidade(<?= $produto->getId() ?>, 1)">
+                                                <strong>+</strong>
+                                            </button>
+                                        </div>
+                                    </td>
 
-                                <td>
-                                    R$ <?= number_format($produto->getPrecoVenda() * $quantidade, 2, ',', '.') ?>
-                                </td>
+                                    <td id="subtotal_<?= $produto->getId() ?>">
+                                        R$ <?= number_format($produto->getPrecoVenda() * $quantidade, 2, ',', '.') ?>
+                                    </td>
 
-                                <td>
-                                    <a  
-                                        href="../../Control/CarrinhoController.php?acao=remover&produto_id=<?= $produto->getId() ?>" 
-                                        class="btn btn-danger btn-sm" 
-                                        onclick="return confirm('Tem certeza que deseja excluir este produto?');">
-                                        Excluir
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endif; ?>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm" 
+                                                onclick="removerProduto(<?= $produto->getId() ?>)">
+                                            Excluir
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
                     <?php endforeach; ?>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+
+            <div class="text-end mb-3">
+                <button type="submit" class="btn btn-primary">
+                    Atualizar Carrinho
+                </button>
+            </div>
+        </form>
 
         <h4 class="text-end mt-3">
             Total da Compra: 
@@ -86,20 +126,62 @@ if (!isset($itens_carrinho, $valor_total, $produtos)) {
             </span>
         </h4>
 
-        <div class="text-end mt-4">
-            <a href="../../Control/CarrinhoController.php?acao=limpar" class="btn btn-success btn-lg">
+        <div class="d-flex justify-content-end gap-3 mt-4">
+            <a href="../Control/CarrinhoController.php?acao=limpar" 
+               class="btn btn-outline-secondary btn-lg"
+               onclick="return confirm('Deseja realmente limpar o carrinho?');">
                 Limpar Carrinho
             </a>
-        </div>
-
-        <div class="text-end mt-4">
-            <a href="../../Control/CarrinhoController.php?acao=confirmar" class="btn btn-success btn-lg">
+            <a href="../Control/CarrinhoController.php?acao=confirmar" class="btn btn-success btn-lg">
                 Confirmar Compra
             </a>
         </div>
 
     <?php endif; ?>
 </div>
+
+<script>
+function alterarQuantidade(produtoId, delta) {
+    const input = document.getElementById('qtd_' + produtoId);
+    let novaQtd = parseInt(input.value) + delta;
+    if (novaQtd < 1) novaQtd = 1;
+    input.value = novaQtd;
+    
+    // Atualiza o subtotal visualmente
+    const preco = parseFloat(input.closest('tr').querySelector('td:nth-child(2)').textContent.replace('R$ ', '').replace('.', '').replace(',', '.'));
+    atualizarSubtotal(produtoId, preco);
+}
+
+function atualizarSubtotal(produtoId, preco) {
+    const qtd = parseInt(document.getElementById('qtd_' + produtoId).value);
+    const subtotal = preco * qtd;
+    document.getElementById('subtotal_' + produtoId).textContent = 
+        'R$ ' + subtotal.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function removerProduto(produtoId) {
+    if (confirm('Tem certeza que deseja excluir este produto?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '../Control/CarrinhoController.php';
+        
+        const acaoInput = document.createElement('input');
+        acaoInput.type = 'hidden';
+        acaoInput.name = 'acao';
+        acaoInput.value = 'remover';
+        
+        const produtoInput = document.createElement('input');
+        produtoInput.type = 'hidden';
+        produtoInput.name = 'produto_id';
+        produtoInput.value = produtoId;
+        
+        form.appendChild(acaoInput);
+        form.appendChild(produtoInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 
 </body>
 </html>

@@ -15,6 +15,17 @@ if (!isset($vendas)) {
 </head>
 <body>
 
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-4 shadow-sm">
+    <a class="navbar-brand fw-bold" href="#">DMS Celulares - Admin</a>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a href="../../Control/ProdutoViewController.php?pagina=admin" class="nav-link">Cadastro de Produtos</a></li>
+            <li class="nav-item"><a href="../../Control/ProdutoViewController.php?pagina=cliente" class="nav-link">Tela de Produtos</a></li>
+            <li class="nav-item"><a href="../../Control/Logout.php" class="nav-link text-danger">Sair</a></li>
+        </ul>
+    </div>
+</nav>
+
 <div class="container mt-5">
     <h2 class="fw-bold text-primary mb-4">📊 Vendas Realizadas</h2>
 

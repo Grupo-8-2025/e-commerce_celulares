@@ -15,8 +15,10 @@
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a href="../../Control/ProdutoViewController.php?pagina=cliente" class="nav-link">Tela de Produtos</a></li>
+            <li class="nav-item"><a href="../../Control/VendaController.php?acao=listar_admin" class="nav-link">Vendas Realizadas</a></li>
             <li class="nav-item"><a href="../../Control/CarrinhoController.php?acao=ver" class="nav-link">Carrinho</a></li>
             <li class="nav-item"><a href="../../Control/VendaController.php?acao=minhas_compras" class="nav-link">Minhas Compras</a></li>
+            <li class="nav-item"><a href="../../Control/Logout.php" class="nav-link text-danger">Sair</a></li>
         </ul>
     </div>
 </nav>

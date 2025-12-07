@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../Model/DAOs/ProdutoDAO.php';
+require_once __DIR__ . '/../Model/Classes/Carrinho.php';
 require_once __DIR__ . '/../Model/Classes/ItemVenda.php';
 require_once __DIR__ . '/../Model/Classes/Venda.php';
 require_once __DIR__ . '/../Model/DAOs/VendaDAO.php';
@@ -10,62 +11,52 @@ require_once __DIR__ . '/../Model/DAOs/ItemVendaDAO.php';
 if (!isset($_SESSION['carrinho'])) {
     $_SESSION['carrinho'] = [];
 }
+$carrinho = Carrinho::fromSession($_SESSION['carrinho']);
 
-$acao = $_GET['acao'] ?? 'ver';
+$acao = $_GET['acao'] ?? $_POST['acao'] ?? 'ver';
 $produtoDAO = new ProdutoDAO();
 $vendaDAO = new VendaDAO();
 $itemVendaDAO = new ItemVendaDAO();
 
-function redirecionarProdutos() {
-    header('Location: ProdutoViewController.php?pagina=cliente');
-    exit;
-}
-
-function calcularTotal(array $itens, array $produtos): float {
-    $total = 0;
-    foreach ($itens as $produtoId => $qtd) {
-        foreach ($produtos as $p) {
-            if ($p->getId() == $produtoId) {
-                $total += $p->getPrecoVenda() * $qtd;
-                break;
-            }
-        }
-    }
-    return $total;
-}
-
 if ($acao === 'adicionar') {
-    $id = (int) ($_POST['produto_id'] ?? $_GET['produto_id'] ?? 0);
-    $quantidade = max(1, (int) ($_POST['quantidade'] ?? $_GET['quantidade'] ?? 1));
-    if ($id > 0) {
-        $_SESSION['carrinho'][$id] = ($_SESSION['carrinho'][$id] ?? 0) + $quantidade;
+    if (!isset($_SESSION['usuario_logado'])) {
+        header('Location: ../View/TelaLogin.php');
+        exit;
     }
-    redirecionarProdutos();
+    $produto_id = filter_input(INPUT_POST, 'produto_id', FILTER_VALIDATE_INT);
+    $quantidade = filter_input(INPUT_POST, 'quantidade', FILTER_VALIDATE_INT);
+    
+    if ($produto_id > 0 && $quantidade > 0) {
+        $carrinho->adicionarItem($produto_id, $quantidade);
+        $_SESSION['carrinho'] = $carrinho->toSession();
+    }
+    header('Location: ../Control/CarrinhoController.php?acao=ver');
+    exit;
 }
 
 if ($acao === 'atualizar') {
     foreach (($_POST['quantidades'] ?? []) as $produtoId => $qtd) {
-        $qtd = max(0, (int) $qtd);
-        if ($qtd === 0) {
-            unset($_SESSION['carrinho'][$produtoId]);
-        } else {
-            $_SESSION['carrinho'][$produtoId] = $qtd;
-        }
+        $carrinho->atualizarQuantidade((int)$produtoId, (int)$qtd);
     }
-    header('Location: CarrinhoController.php?acao=ver');
+    $_SESSION['carrinho'] = $carrinho->toSession();
+    header('Location: ../Control/CarrinhoController.php?acao=ver');
     exit;
 }
 
 if ($acao === 'remover') {
-    $id = (int) ($_GET['produto_id'] ?? 0);
-    unset($_SESSION['carrinho'][$id]);
-    header('Location: CarrinhoController.php?acao=ver');
+    $id = filter_input(INPUT_POST, 'produto_id', FILTER_VALIDATE_INT);
+    if ($id > 0) {
+        $carrinho->removerItem($id);
+        $_SESSION['carrinho'] = $carrinho->toSession();
+    }
+    header('Location: ../Control/CarrinhoController.php?acao=ver');
     exit;
 }
 
 if ($acao === 'limpar') {
-    $_SESSION['carrinho'] = [];
-    header('Location: CarrinhoController.php?acao=ver');
+    $carrinho->limpar();
+    $_SESSION['carrinho'] = $carrinho->toSession();
+    header('Location: ../Control/CarrinhoController.php?acao=ver');
     exit;
 }
 
@@ -75,28 +66,38 @@ if ($acao === 'confirmar') {
         exit;
     }
 
-    $itens = $_SESSION['carrinho'];
+    $itens = $carrinho->getItens();
     if (empty($itens)) {
-        header('Location: CarrinhoController.php?acao=ver');
+        header('Location: ../Control/CarrinhoController.php?acao=ver&erro=1&erro_msg=Carrinho+vazio');
         exit;
     }
 
+    $usuarioId = (int)($_SESSION['usuario_id'] ?? 0);
+    if ($usuarioId <= 0) {
+        error_log('Confirmar: usuario_id invalido na sessao');
+        header('Location: ../View/TelaLogin.php');
+        exit;
+    }
+
+    // Carrega produtos e valida que todos do carrinho existem
     $produtos = $produtoDAO->listarTodos();
-    $valorTotal = calcularTotal($itens, $produtos);
-
-    $venda = new Venda(null, $_SESSION['usuario_id'] ?? $_SESSION['usuario_login'] ?? 0, date('Y-m-d'), $valorTotal);
-    $itensVenda = [];
-    foreach ($itens as $produtoId => $qtd) {
-        $itensVenda[] = new ItemVenda(null, null, $produtoId, $qtd);
+    $map = [];
+    foreach ($produtos as $p) { $map[$p->getId()] = true; }
+    foreach ($itens as $pid => $_q) {
+        if (!isset($map[(int)$pid])) {
+            error_log('Confirmar: produto nao encontrado id=' . (int)$pid);
+            header('Location: ../Control/CarrinhoController.php?acao=ver&erro=1&erro_msg=Produto+nao+encontrado');
+            exit;
+        }
     }
 
-    if ($vendaDAO->criarComItens($venda, $itensVenda)) {
-        $_SESSION['carrinho'] = [];
-        header('Location: VendaController.php?acao=minhas_compras&sucesso=1');
+    if ($carrinho->confirmarCompra($usuarioId, $produtos, $vendaDAO, $itemVendaDAO)) {
+        $_SESSION['carrinho'] = $carrinho->toSession();
+        header('Location: ../Control/VendaController.php?acao=minhas_compras&sucesso=1');
         exit;
     }
 
-    header('Location: CarrinhoController.php?acao=ver&erro=1');
+    header('Location: ../Control/CarrinhoController.php?acao=ver&erro=1&erro_msg=Falha+ao+registrar+venda');
     exit;
 }
 
@@ -107,7 +108,7 @@ if (!isset($_SESSION['usuario_logado'])) {
 
 $itens_carrinho = $_SESSION['carrinho'];
 $produtos = $produtoDAO->listarTodos();
-$valor_total = calcularTotal($itens_carrinho, $produtos);
+$valor_total = $carrinho->calcularTotal($produtos);
 
 include __DIR__ . '/../View/Cliente/TelaCarrinho.php';
 exit;

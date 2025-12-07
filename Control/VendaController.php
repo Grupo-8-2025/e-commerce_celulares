@@ -18,10 +18,8 @@ if ($acao === 'minhas_compras') {
         header('Location: ../View/TelaLogin.php');
         exit;
     }
-    $usuarioId = $_SESSION['usuario_id'] ?? null;
-    $usuarioId = $usuarioId ?: ($_SESSION['usuario_login'] ?? null);
-
-    $compras = $usuarioId ? $vendaDAO->listarPorUsuario($usuarioId) : [];
+    $usuarioId = (int) ($_SESSION['usuario_id'] ?? 0);
+    $compras = $usuarioId > 0 ? $vendaDAO->listarPorUsuario($usuarioId) : [];
     include __DIR__ . '/../View/Cliente/MinhasCompras.php';
     exit;
 }
@@ -73,8 +71,8 @@ if ($acao === 'listar_admin') {
         exit;
     }
 
-    $data_inicial = $_GET['data_inicial'] ?? null;
-    $data_final = $_GET['data_final'] ?? null;
+    $data_inicial = trim($_GET['data_inicial'] ?? '');
+    $data_final = trim($_GET['data_final'] ?? '');
     $vendas = $vendaDAO->listarPorPeriodo($data_inicial ?: null, $data_final ?: null);
     include __DIR__ . '/../View/Adm/TelaVendas.php';
     exit;

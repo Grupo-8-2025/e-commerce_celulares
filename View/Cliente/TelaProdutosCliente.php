@@ -17,7 +17,6 @@ $nome_categoria_selecionada = $nome_categoria_selecionada ?? null;
     <title>DMS Celulares - Produtos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Mantém todos os cards com altura uniforme */
         .product-card {
             height: 100%;
             display: flex;
@@ -49,8 +48,10 @@ $nome_categoria_selecionada = $nome_categoria_selecionada ?? null;
 
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a href="../../Control/CarrinhoController.php?acao=ver" class="nav-link">Carrinho de Compras</a></li>
-            <li class="nav-item"><a href="../../Control/VendaController.php?acao=minhas_compras" class="nav-link">Minhas Compras</a></li>
+            <li class="nav-item"><a href="../Control/CarrinhoController.php?acao=ver" class="nav-link">Carrinho de Compras</a></li>
+            <li class="nav-item"><a href="../Control/VendaController.php?acao=minhas_compras" class="nav-link">Minhas Compras</a></li>
+            <li class="nav-item"><a href="../Sobre.php" class="nav-link">Sobre</a></li>
+            <li class="nav-item"><a href="../Control/Logout.php" class="nav-link text-danger">Sair</a></li>
         </ul>
     </div>
 </nav>
@@ -61,7 +62,6 @@ $nome_categoria_selecionada = $nome_categoria_selecionada ?? null;
         Os melhores kits para o tratamento completo dos seus cabelos.
     </p>
 
-    <!-- ===================== FILTRO DE CATEGORIAS ====================== -->
     <div class="mt-4">
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -69,7 +69,6 @@ $nome_categoria_selecionada = $nome_categoria_selecionada ?? null;
             </button>
 
             <ul class="dropdown-menu">
-                <!-- Exibe TODAS as categorias -->
                 <?php foreach ($categorias as $categoria): ?>
                     <li>
                         <a class="dropdown-item" href="?pagina=cliente&categoria=<?= $categoria->getId() ?>">
@@ -78,20 +77,17 @@ $nome_categoria_selecionada = $nome_categoria_selecionada ?? null;
                     </li>
                 <?php endforeach; ?>
 
-                <!-- Opção para limpar filtros -->
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item text-danger" href="?pagina=cliente">Limpar filtro</a></li>
             </ul>
         </div>
 
-        <!-- Exibe nome da categoria atual -->
         <?php if (isset($nome_categoria_selecionada)): ?>
             <p class="mt-2 text-primary fw-bold">
                 Categoria selecionada: <?= $nome_categoria_selecionada ?>
             </p>
         <?php endif; ?>
     </div>
-    <!-- =============================================================== -->
 
     <div class="row mt-4">
         <?php foreach ($produtos as $produto): ?>
@@ -108,8 +104,8 @@ $nome_categoria_selecionada = $nome_categoria_selecionada ?? null;
                         </h4>
 
                         <div class="d-flex justify-content-center mt-3">
-                            <form method="POST" action="../../Control/CarrinhoController.php?action=adicionar" class="d-flex">
-                                <input type="hidden" name="id_produto" value="<?= $produto->getId() ?>">
+                            <form method="POST" action="../Control/CarrinhoController.php?acao=adicionar" class="d-flex">
+                                <input type="hidden" name="produto_id" value="<?= $produto->getId() ?>">
                                 <input type="number" name="quantidade" value="1" min="1" class="form-control w-25 me-2 text-center">
                                 <button type="submit" class="btn btn-primary">Adicionar no carrinho</button>
                             </form>
