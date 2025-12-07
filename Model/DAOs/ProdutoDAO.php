@@ -72,6 +72,39 @@ class ProdutoDAO {
         return $produtos;
     }
 
+    public function listarPorIds(array $ids) {
+        if (empty($ids)) {
+            return [];
+        }
+
+        $ids = array_map('intval', $ids);
+        $ids = array_filter($ids, fn($id) => $id > 0);
+        
+        if (empty($ids)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        
+        $sql = "SELECT p.*, c.id AS categoria_id, c.nome AS categoria_nome, f.id AS fabricante_id, f.nome AS fabricante_nome, f.site AS fabricante_site 
+                FROM {$this->tabela} p 
+                INNER JOIN categoria c ON p.categoria_id = c.id 
+                INNER JOIN fabricante f ON p.fabricante_id = f.id 
+                WHERE p.id IN ($placeholders)
+                ORDER BY p.nome";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($ids);
+        
+        $produtos = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $produto = $this->hidratar($row);
+            $produtos[$produto->getId()] = $produto;
+        }
+        
+        return $produtos;
+    }
+
     public function atualizar(Produto $produto) {
         $sql = "UPDATE {$this->tabela} SET categoria_id = :categoria_id, fabricante_id = :fabricante_id, nome = :nome, descricao = :descricao, imagem = :imagem, estoque = :estoque, preco_custo = :preco_custo, preco_venda = :preco_venda WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);

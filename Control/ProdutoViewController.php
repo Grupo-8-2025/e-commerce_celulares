@@ -1,7 +1,12 @@
 <?php
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 require_once __DIR__ . '/ProdutoController.php';
+require_once __DIR__ . '/ErrorHandler.php';
+require_once __DIR__ . '/CSRFTokenHandler.php';
+require_once __DIR__ . '/AuthHandler.php';
 
 $produtoController = new ProdutoController();
 
@@ -36,10 +41,9 @@ if ($pagina === 'cliente') {
 }
 
 if ($pagina === 'admin') {
-    if (!isset($_SESSION['usuario_logado']) || ($_SESSION['usuario_tipo'] ?? 1) !== 0) {
-        header('Location: ../View/TelaLogin.php');
-        exit;
-    }
+    AuthHandler::requerAdmin();
+    
+    AuthHandler::registrarAcaoAdmin('Acesso ao painel de admin - produtos', ['ip' => $_SERVER['REMOTE_ADDR']]);
 
     $mensagemSucesso = '';
     $mensagemErro = '';
@@ -49,41 +53,64 @@ if ($pagina === 'admin') {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $acao = $_POST['action'] ?? '';
         try {
-            // Sanitize inputs
-            $dadosSanitizados = [
-                'id' => filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT) ?: null,
-                'nome' => trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_SPECIAL_CHARS) ?? ''),
-                'descricao' => trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_SPECIAL_CHARS) ?? ''),
-                'imagem' => trim(filter_input(INPUT_POST, 'imagem', FILTER_SANITIZE_URL) ?? ''),
-                'estoque' => filter_input(INPUT_POST, 'estoque', FILTER_VALIDATE_INT) ?: 0,
-                'preco_custo' => filter_input(INPUT_POST, 'preco_custo', FILTER_VALIDATE_FLOAT) ?: 0,
-                'preco_venda' => filter_input(INPUT_POST, 'preco_venda', FILTER_VALIDATE_FLOAT) ?: 0,
-                'categoria_id' => filter_input(INPUT_POST, 'categoria_id', FILTER_VALIDATE_INT) ?: 0,
-                'fabricante_id' => filter_input(INPUT_POST, 'fabricante_id', FILTER_VALIDATE_INT) ?: 0,
-                'caracteristicas' => trim($_POST['caracteristicas'] ?? '')
-            ];
+            // Validar token CSRF
+            $csrf_token = $_POST['csrf_token'] ?? '';
+            if (!CSRFTokenHandler::validateToken($csrf_token)) {
+                ErrorHandler::log(ErrorHandler::ERR_SYSTEM, 'ProdutoViewController::POST - Token CSRF inválido', ['ip' => $_SERVER['REMOTE_ADDR']]);
+                $mensagemErro = 'Token de segurança inválido. Tente novamente.';
+            } else {
+                CSRFTokenHandler::regenerateToken();
+                
+                $dadosSanitizados = [
+                    'id' => filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT) ?: null,
+                    'nome' => trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_SPECIAL_CHARS) ?? ''),
+                    'descricao' => trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_SPECIAL_CHARS) ?? ''),
+                    'imagem' => trim(filter_input(INPUT_POST, 'imagem', FILTER_SANITIZE_URL) ?? ''),
+                    'estoque' => filter_input(INPUT_POST, 'estoque', FILTER_VALIDATE_INT) ?: 0,
+                    'preco_custo' => filter_input(INPUT_POST, 'preco_custo', FILTER_VALIDATE_FLOAT) ?: 0,
+                    'preco_venda' => filter_input(INPUT_POST, 'preco_venda', FILTER_VALIDATE_FLOAT) ?: 0,
+                    'categoria_id' => filter_input(INPUT_POST, 'categoria_id', FILTER_VALIDATE_INT) ?: 0,
+                    'fabricante_id' => filter_input(INPUT_POST, 'fabricante_id', FILTER_VALIDATE_INT) ?: 0,
+                    'caracteristicas' => trim($_POST['caracteristicas'] ?? '')
+                ];
 
-            if ($acao === 'create' || $acao === 'update') {
-                if ($produtoController->salvarProduto($dadosSanitizados)) {
-                    $mensagemSucesso = $acao === 'create'
-                        ? 'Produto criado com sucesso.'
-                        : 'Produto atualizado com sucesso.';
-                } else {
-                    $mensagemErro = $acao === 'create'
-                        ? 'Não foi possível criar o produto.'
-                        : 'Não foi possível atualizar o produto.';
+                if ($acao === 'create' || $acao === 'update') {
+                    $resultado = $produtoController->salvarProduto($dadosSanitizados);
+                    if ($resultado['sucesso']) {
+                        $mensagemSucesso = $acao === 'create'
+                            ? 'Produto criado com sucesso.'
+                            : 'Produto atualizado com sucesso.';
+                        
+                        AuthHandler::registrarAcaoAdmin(
+                            $acao === 'create' ? 'Produto criado' : 'Produto atualizado',
+                            ['nome' => $dadosSanitizados['nome'], 'id' => $dadosSanitizados['id'] ?? 'novo']
+                        );
+                    } else {
+                        if (!empty($resultado['erros'])) {
+                            ErrorHandler::log(ErrorHandler::ERR_VALIDATION, 'ProdutoViewController::salvarProduto - Validação falhou', $resultado['erros']);
+                            $mensagemErro = 'Erro(s) na validação: ' . implode(' | ', $resultado['erros']);
+                        } else {
+                            ErrorHandler::log(ErrorHandler::ERR_DATABASE, 'ProdutoViewController::salvarProduto - Falha no banco', ['acao' => $acao, 'produto_id' => $dadosSanitizados['id']]);
+                            $mensagemErro = $acao === 'create'
+                                ? 'Não foi possível criar o produto.'
+                                : 'Não foi possível atualizar o produto.';
+                        }
+                    }
                 }
-            }
 
-            if ($acao === 'delete') {
-                $id = (int) ($_POST['id'] ?? 0);
-                if ($produtoController->deletarProduto($id)) {
-                    $mensagemSucesso = 'Produto removido com sucesso.';
-                } else {
-                    $mensagemErro = 'Não foi possível remover o produto.';
+                if ($acao === 'delete') {
+                    $id = (int) ($_POST['id'] ?? 0);
+                    if ($produtoController->deletarProduto($id)) {
+                        $mensagemSucesso = 'Produto removido com sucesso.';
+                        AuthHandler::registrarAcaoAdmin('Produto deletado', ['produto_id' => $id]);
+                    } else {
+                        ErrorHandler::log(ErrorHandler::ERR_DATABASE, 'ProdutoViewController::deletarProduto - Falha ao deletar', ['produto_id' => $id]);
+                        $mensagemErro = 'Não foi possível remover o produto.';
+                    }
                 }
             }
         } catch (Exception $e) {
+            ErrorHandler::log(ErrorHandler::ERR_SYSTEM, 'ProdutoViewController::POST - Exceção inesperada', $e);
             $mensagemErro = 'Erro: ' . $e->getMessage();
         }
     }

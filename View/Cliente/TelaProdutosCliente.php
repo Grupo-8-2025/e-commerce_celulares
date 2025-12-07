@@ -1,9 +1,10 @@
 <?php
-// Se a view for acessada diretamente, redireciona para o controlador para popular os dados
 if (!isset($dadosProdutosCarregados)) {
     header('Location: ../../Control/ProdutoViewController.php?pagina=cliente');
     exit;
 }
+
+require_once __DIR__ . '/../../Control/CSRFTokenHandler.php';
 
 $categorias = $categorias ?? [];
 $produtos = $produtos ?? [];
@@ -50,7 +51,7 @@ $nome_categoria_selecionada = $nome_categoria_selecionada ?? null;
         <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a href="../Control/CarrinhoController.php?acao=ver" class="nav-link">Carrinho de Compras</a></li>
             <li class="nav-item"><a href="../Control/VendaController.php?acao=minhas_compras" class="nav-link">Minhas Compras</a></li>
-            <li class="nav-item"><a href="../Sobre.php" class="nav-link">Sobre</a></li>
+            <li class="nav-item"><a href="../View/Sobre.php" class="nav-link">Sobre</a></li>
             <li class="nav-item"><a href="../Control/Logout.php" class="nav-link text-danger">Sair</a></li>
         </ul>
     </div>
@@ -105,6 +106,7 @@ $nome_categoria_selecionada = $nome_categoria_selecionada ?? null;
 
                         <div class="d-flex justify-content-center mt-3">
                             <form method="POST" action="../Control/CarrinhoController.php?acao=adicionar" class="d-flex">
+                                <?php echo CSRFTokenHandler::getTokenInputHTML(); ?>
                                 <input type="hidden" name="produto_id" value="<?= $produto->getId() ?>">
                                 <input type="number" name="quantidade" value="1" min="1" class="form-control w-25 me-2 text-center">
                                 <button type="submit" class="btn btn-primary">Adicionar no carrinho</button>

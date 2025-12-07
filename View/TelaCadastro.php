@@ -1,5 +1,9 @@
 <?php
-    session_start();
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+    
+    require_once __DIR__ . '/../Control/CSRFTokenHandler.php';
 
     $erros = isset($_SESSION['erros_cadastro']) ? $_SESSION['erros_cadastro'] : [];
     $nome = isset($_SESSION['dados_cadastro']['nome']) ? $_SESSION['dados_cadastro']['nome'] : '';
@@ -46,6 +50,7 @@
                                 As senhas não coincidem. Por favor, verifique.
                             </div>
                             <form action="../Control/Controllers.php?acao=usuario_cadastro" method="POST" id="form-cadastro">
+                                <?php echo CSRFTokenHandler::getTokenInputHTML(); ?>
                                 <div class="mb-3">
                                     <label for="nome" class="form-label">Nome Completo</label>
                                     <input type="text" class="form-control" id="nome" name="nome" value="<?php echo htmlspecialchars($nome); ?>" required>

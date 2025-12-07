@@ -1,4 +1,9 @@
-<?php // Variáveis são preparadas pelo controller; a view apenas exibe. ?>
+<?php 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+require_once __DIR__ . '/../../Control/CSRFTokenHandler.php';
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -14,11 +19,8 @@
     <a class="navbar-brand fw-bold" href="#">DMS Celulares</a>
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a href="../../Control/ProdutoViewController.php?pagina=cliente" class="nav-link">Tela de Produtos</a></li>
-            <li class="nav-item"><a href="../../Control/VendaController.php?acao=listar_admin" class="nav-link">Vendas Realizadas</a></li>
-            <li class="nav-item"><a href="../../Control/CarrinhoController.php?acao=ver" class="nav-link">Carrinho</a></li>
-            <li class="nav-item"><a href="../../Control/VendaController.php?acao=minhas_compras" class="nav-link">Minhas Compras</a></li>
-            <li class="nav-item"><a href="../../Control/Logout.php" class="nav-link text-danger">Sair</a></li>
+            <li class="nav-item"><a href="../Control/VendaController.php?acao=listar_admin" class="nav-link">Vendas Realizadas</a></li>
+            <li class="nav-item"><a href="../Control/Logout.php" class="nav-link text-danger">Sair</a></li>
         </ul>
     </div>
 </nav>
@@ -39,6 +41,7 @@
                     <?php endif; ?>
                     <form method="POST" action="?pagina=admin">
                         <input type="hidden" name="action" value="<?= $produtoEdicao ? 'update' : 'create' ?>">
+                        <?= CSRFTokenHandler::getTokenInputHTML() ?>
                         <?php if ($produtoEdicao): ?>
                             <input type="hidden" name="id" value="<?= (int) $produtoEdicao->getId() ?>">
                         <?php endif; ?>
@@ -142,6 +145,7 @@
                                             <form method="POST" action="?pagina=admin" class="d-inline" onsubmit="return confirm('Remover este produto?');">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?= $p->getId() ?>">
+                                                <?= CSRFTokenHandler::getTokenInputHTML() ?>
                                                 <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
                                             </form>
                                         </td>

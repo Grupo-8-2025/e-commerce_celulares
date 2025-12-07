@@ -1,5 +1,9 @@
 <?php
-// Esta view deve ser carregada pelo VendaController; se acessada diretamente, redireciona
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+require_once __DIR__ . '/../../Control/CSRFTokenHandler.php';
+
 if (!isset($vendas)) {
     header('Location: ../../Control/VendaController.php?acao=listar_admin');
     exit;
@@ -19,9 +23,8 @@ if (!isset($vendas)) {
     <a class="navbar-brand fw-bold" href="#">DMS Celulares - Admin</a>
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a href="../../Control/ProdutoViewController.php?pagina=admin" class="nav-link">Cadastro de Produtos</a></li>
-            <li class="nav-item"><a href="../../Control/ProdutoViewController.php?pagina=cliente" class="nav-link">Tela de Produtos</a></li>
-            <li class="nav-item"><a href="../../Control/Logout.php" class="nav-link text-danger">Sair</a></li>
+            <li class="nav-item"><a href="../Control/ProdutoViewController.php?pagina=admin" class="nav-link">Cadastro de Produtos</a></li>
+            <li class="nav-item"><a href="../Control/Logout.php" class="nav-link text-danger">Sair</a></li>
         </ul>
     </div>
 </nav>

@@ -1,4 +1,9 @@
 <?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+require_once __DIR__ . '/../../Control/CSRFTokenHandler.php';
+
 // Esta view deve ser carregada pelo VendaController; se acessada diretamente, redireciona
 if (!isset($compras)) {
     header('Location: ../../Control/VendaController.php?acao=minhas_compras');

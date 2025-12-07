@@ -1,5 +1,9 @@
 <?php
-    session_start();
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+    
+    require_once __DIR__ . '/../Control/CSRFTokenHandler.php';
 
     $erros = isset($_SESSION['erros_login']) ? $_SESSION['erros_login'] : [];
     $email = isset($_SESSION['email_login']) ? $_SESSION['email_login'] : '';
@@ -45,6 +49,7 @@
                                 </div>
                             <?php endif; ?>
                             <form action="../Control/Controllers.php?acao=usuario_login" method="POST">
+                                <?php echo CSRFTokenHandler::getTokenInputHTML(); ?>
                                 <div class="mb-3">
                                     <label for="login" class="form-label">Email</label>
                                     <input type="email" class="form-control" id="login" name="login" value="<?php echo htmlspecialchars($email); ?>" required>

@@ -1,4 +1,9 @@
 <?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+require_once __DIR__ . '/../../Control/CSRFTokenHandler.php';
+
 // Define valores padrão caso não venham do controller
 $itens_carrinho = $itens_carrinho ?? [];
 $valor_total = $valor_total ?? 0;
@@ -49,6 +54,7 @@ $produtos = $produtos ?? [];
     <?php else: ?>
 
         <form action="../Control/CarrinhoController.php" method="POST">
+            <?php echo CSRFTokenHandler::getTokenInputHTML(); ?>
             <input type="hidden" name="acao" value="atualizar">
             
             <table class="table table-bordered align-middle text-center">
@@ -127,14 +133,16 @@ $produtos = $produtos ?? [];
         </h4>
 
         <div class="d-flex justify-content-end gap-3 mt-4">
-            <a href="../Control/CarrinhoController.php?acao=limpar" 
-               class="btn btn-outline-secondary btn-lg"
-               onclick="return confirm('Deseja realmente limpar o carrinho?');">
+            <button type="button" 
+                    class="btn btn-outline-secondary btn-lg"
+                    onclick="return enviarFormulario('limpar', 'Deseja realmente limpar o carrinho?');">
                 Limpar Carrinho
-            </a>
-            <a href="../Control/CarrinhoController.php?acao=confirmar" class="btn btn-success btn-lg">
+            </button>
+            <button type="button" 
+                    class="btn btn-success btn-lg"
+                    onclick="return enviarFormulario('confirmar');">
                 Confirmar Compra
-            </a>
+            </button>
         </div>
 
     <?php endif; ?>
@@ -175,11 +183,42 @@ function removerProduto(produtoId) {
         produtoInput.name = 'produto_id';
         produtoInput.value = produtoId;
         
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'csrf_token';
+        tokenInput.value = '<?= htmlspecialchars(CSRFTokenHandler::getToken()) ?>';
+        
         form.appendChild(acaoInput);
         form.appendChild(produtoInput);
+        form.appendChild(tokenInput);
         document.body.appendChild(form);
         form.submit();
     }
+}
+
+function enviarFormulario(acao, confirmarMsg = null) {
+    if (confirmarMsg && !confirm(confirmarMsg)) {
+        return false;
+    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '../Control/CarrinhoController.php';
+    
+    const acaoInput = document.createElement('input');
+    acaoInput.type = 'hidden';
+    acaoInput.name = 'acao';
+    acaoInput.value = acao;
+    
+    const tokenInput = document.createElement('input');
+    tokenInput.type = 'hidden';
+    tokenInput.name = 'csrf_token';
+    tokenInput.value = '<?= htmlspecialchars(CSRFTokenHandler::getToken()) ?>';
+    
+    form.appendChild(acaoInput);
+    form.appendChild(tokenInput);
+    document.body.appendChild(form);
+    form.submit();
+    return false;
 }
 </script>
 
