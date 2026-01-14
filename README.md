@@ -40,4 +40,5 @@ Aproveite e explore o site! 😄
 
 <img width="1200" height="675" alt="preview" src="https://github.com/user-attachments/assets/12bdf341-d6ac-444c-8934-2a8f0aaa767a" />
 
+
 > **Observação:** Desconsidere o texto dessa seção, é apenas **fictício**.
