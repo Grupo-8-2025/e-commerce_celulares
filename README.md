@@ -5,6 +5,24 @@ O projeto consiste numa loja de celulares, construída para fins didáticos, uti
 
 > **Observação:** O projeto é **fictício**, desenvolvido para fins didáticos.
 
+## Requisitos:
+- XAMPP instalado
+- MySQL instalado
+  
+## ⚙️ Configuração
+
+Siga as etapas abaixo:
+
+1. Clone ou Baixe o Repositório
+   - Baixe e extraia o arquivo zip
+   - Copie o projeto principal (pasta crud_produtos) para a pasta C:\xampp\htdocs no Disco Local
+     
+2. Configuração do Projeto
+   - Abra o XAMPP e inicie o Apache e o MySQL
+   - Abra o SGBD de sua preferência (SQL Server, phMyAdmin) e rode o script do arquivo: script_banco.txt
+   - Abra o navegador e digite no campo de pesquisa http://localhost/e-commerce_celulares/View/TelaLogin.php
+   - Teste o projeto
+
 ---
 
 ## 🛒 Deseja comprar um celular?
