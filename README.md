@@ -15,7 +15,7 @@ Siga as etapas abaixo:
 
 1. Clone ou Baixe o Repositório
    - Baixe e extraia o arquivo zip
-   - Copie o projeto principal (pasta crud_produtos) para a pasta C:\xampp\htdocs no Disco Local
+   - Copie o projeto principal (pasta e-commerce_celulares) para a pasta C:\xampp\htdocs no Disco Local
      
 2. Configuração do Projeto
    - Abra o XAMPP e inicie o Apache e o MySQL
