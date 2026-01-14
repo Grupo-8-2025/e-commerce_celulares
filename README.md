@@ -1,8 +1,9 @@
-# 📱 Trabalho Prático de WEB – Loja de Celulares (MVC)
+# 📱 E-commerce – Loja de Celulares (MVC)
 
-Projeto desenvolvido para a disciplina de Web, utilizando arquitetura **MVC** para criar uma loja de celulares com PHP.
+Bem-vindo ao repositório E-commerce de Celulares! Este projeto foi desenvolvido como trabalho prático da matéria Aplicações para WEB 2 no curso técnico de informática do CEFET-MG.
+O projeto consiste numa loja de celulares, construída para fins didáticos, utilizando PHP e a arquitetura **Model-View-Controller (MVC)**.
 
-> **Observação:** Este é um projeto **fictício**.
+> **Observação:** O projeto é **fictício**, desenvolvido para fins didáticos.
 
 ---
 
