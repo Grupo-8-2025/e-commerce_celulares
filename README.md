@@ -5,7 +5,7 @@ O projeto consiste numa loja de celulares, construída para fins didáticos, uti
 
 > **Observação:** O projeto é **fictício**, desenvolvido para fins didáticos.
 
-## Requisitos:
+## ✔ Requisitos:
 - XAMPP instalado
 - MySQL instalado
   
