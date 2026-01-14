@@ -1,4 +1,4 @@
-# 📱 E-commerce – Loja de Celulares (MVC)
+# 📱 E-commerce – Loja de Celulares
 
 Bem-vindo ao repositório **E-commerce de Celulares**! Este projeto foi desenvolvido como trabalho prático da matéria Aplicações para WEB 2 no curso técnico de informática do CEFET-MG.
 O projeto consiste numa loja de celulares, construída para fins didáticos, utilizando **PHP** e a arquitetura **Model-View-Controller (MVC)**.
