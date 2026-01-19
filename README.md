@@ -15,12 +15,12 @@ Siga as etapas abaixo:
 
 1. Clone ou Baixe o Repositório
    - Baixe e extraia o arquivo zip
-   - Copie o projeto principal (pasta e-commerce_celulares) para a pasta C:\xampp\htdocs no Disco Local
+   - Copie o projeto principal (pasta ecommerce_celulares) para a pasta C:\xampp\htdocs no Disco Local
      
 2. Configuração do Projeto
    - Abra o XAMPP e inicie o Apache e o MySQL
    - Abra o SGBD de sua preferência (SQL Server, phMyAdmin) e rode o script do arquivo: script_banco.txt
-   - Abra o navegador e digite no campo de pesquisa http://localhost/e-commerce_celulares/View/TelaLogin.php
+   - Abra o navegador e digite no campo de pesquisa http://localhost/ecommerce_celulares/View/TelaLogin.php
    - Teste o projeto
 
 ---
@@ -41,4 +41,4 @@ Aproveite e explore o site! 😄
 <img width="1200" height="675" alt="preview" src="https://github.com/user-attachments/assets/12bdf341-d6ac-444c-8934-2a8f0aaa767a" /><br>
 
 
-> **Observação:** Ignore o texto dessa seção, poie é **fictício**.
+> **Observação:** Ignore o texto dessa seção (**Deseja comprar um celular?**), pois é **fictício**.
